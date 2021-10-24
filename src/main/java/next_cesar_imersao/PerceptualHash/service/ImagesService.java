@@ -97,7 +97,7 @@ public class ImagesService {
         File pasta = new File(String.valueOf(fileStorageLocation));
         for (File file : pasta.listFiles()) {
             if(nome.equals(file.getName())){
-                deleteDirectory(fileStorageLocation.toFile());
+                file.delete();
                 imagesRepository.deleteById(id);
             }
         }
