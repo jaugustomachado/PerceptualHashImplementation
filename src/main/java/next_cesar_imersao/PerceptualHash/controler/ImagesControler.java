@@ -1,13 +1,16 @@
 package next_cesar_imersao.PerceptualHash.controler;
 
+import next_cesar_imersao.PerceptualHash.model.Images;
 import next_cesar_imersao.PerceptualHash.service.ImagesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class ImagesControler {
@@ -20,8 +23,9 @@ public class ImagesControler {
     }
 
     @GetMapping({"/", "/images/list", "/images/list/"})
-    public String showListImages() {
-        return "ListaImagens";
+    @ResponseStatus(HttpStatus.OK)
+    public @ResponseBody List<Images> showListImagens(){
+        return this.imagesService.listagemImagens();
     }
 
     @PostMapping({"/imagem/save", "/imagem/save/"})
@@ -31,8 +35,15 @@ public class ImagesControler {
         return "imagem inserida";
     }
 
+    @DeleteMapping({ "/imagem/{id}/{nome}", "/imagem/{id}/{nome}/"})
+    public String delete(@RequestParam("id") final Long id,
+                         @RequestParam("nome") final String nome) throws IOException {
+        this.imagesService.delete(id,nome);
+        return "imagem deletada do banco de dados";
+    }
+
     @PostMapping({"/imagem/comparar2imagens", "/imagem/comparar2imagens/"})
-    public String storeFile(@RequestParam("imagem1") MultipartFile multipartFile1,
+    public String comparar2Imagens(@RequestParam("imagem1") MultipartFile multipartFile1,
                             @RequestParam("imagem2") MultipartFile multipartFile2
     ) throws Exception {
         imagesService.compararDuasImagens(multipartFile1,multipartFile2);
@@ -41,10 +52,10 @@ public class ImagesControler {
                 " é: " + imagesService.getSimilarityScore());
     }
 
-    @DeleteMapping({ "/{id}/{nome}", "/{id}/{nome}/"})
-    public String delete(@RequestParam("id") final Long id,
-                         @RequestParam("nome") final String nome) throws IOException {
-        this.imagesService.delete(id,nome);
-        return "imagem deletada do banco de dados";
+    @PostMapping({"/imagem/comparar1imagem", "/imagem/comparar1imagem/"})
+    public String comparar1Imagem(@RequestParam("imagem1") MultipartFile file1) throws Exception {
+        imagesService.compararUmaImagem(file1);
+        return ("Comparação feita com sucesso");
     }
+
 }

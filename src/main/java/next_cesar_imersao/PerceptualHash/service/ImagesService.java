@@ -7,27 +7,21 @@ import dev.brachtendorf.jimagehash.hashAlgorithms.HashingAlgorithm;
 import next_cesar_imersao.PerceptualHash.model.Images;
 import next_cesar_imersao.PerceptualHash.repository.ImagesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import javax.annotation.Resource;
+
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static org.apache.tomcat.util.http.fileupload.FileUtils.deleteDirectory;
+import java.util.List;
 
 
 @Service
@@ -44,8 +38,8 @@ public class ImagesService {
     }
 
     @Transactional
-    public Set<Images> listagemImagens() {
-        return new LinkedHashSet<>(this.imagesRepository.findAll());
+    public List<Images> listagemImagens() {
+       return this.imagesRepository.findAll();
     }
 
     public void saveFile(String nome,
@@ -120,23 +114,24 @@ public class ImagesService {
         this.similarityScore = similarityScore;
     }
 
-//    public String CompararUmaImagem(MultipartFile file1) throws Exception {
-//        double score=64;
-//
-//        BufferedImage img1 = ImageIO.read(file1.getInputStream());
-//        Hash hash1 = hasher.hash(img1);
-//
-//        for (BigInteger hash : imagesRepository.findAllHashvalues()) {
-//            hash hashCodeOfhash = hash.hashCode();
-//            hash = Object.hashCode(hash);
-//            this.similarityScore = hash1.normalizedHammingDistance();
-//            if (similarityScore<score){
-//                score=this.similarityScore;
-//                String imagemMaisIgual=imagesRepository.toString(hash);
-//            }
-//        }
-//        return ("A imagem mais similar é: "+ imagemMaisIgual);
-//    }
+    public String compararUmaImagem(MultipartFile file1) throws Exception {
+        double score=64;
+        String imagemMaisIgual="";
+
+        BufferedImage img1 = ImageIO.read(file1.getInputStream());
+        Hash hash1 = hasher.hash(img1);
+
+        for (Images image : this.imagesRepository.findAll()) {
+            System.out.println(image.getHashvalue());
+            //this.similarityScore = hash1.normalizedHammingDistance(hash2);
+            if (similarityScore<score){
+                score=this.similarityScore;
+                imagemMaisIgual=image.getNome();
+            }
+        }
+        return ("A imagem mais similar é: "+ imagemMaisIgual +
+                "com o coeficiente de diferença: "+ similarityScore);
+   }
 
 }
 
