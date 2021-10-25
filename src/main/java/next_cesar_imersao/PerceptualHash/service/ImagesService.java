@@ -29,7 +29,6 @@ public class ImagesService {
 
     private final ImagesRepository imagesRepository;
     private static final HashingAlgorithm hasher = new AverageHash(64);
-    private double similarityScore;
     private final Path fileStorageLocation= Path.of("src/Imagens/");
 
     @Autowired
@@ -68,7 +67,6 @@ public class ImagesService {
                 fileExtension = "";
             }
             if (fileExtension.equals(".jpg")) {
-                //Path targetLocation = this.fileStorageLocation.resolve(originalNome);
                 saveFile(originalNome, file);
                 Images newImage = new Images();
                 newImage.setNome(originalNome);
@@ -88,49 +86,43 @@ public class ImagesService {
 
     @Transactional
     public void delete(Long id, String nome) throws IOException {
-        File pasta = new File(String.valueOf(fileStorageLocation));
-        for (File file : pasta.listFiles()) {
-            if(nome.equals(file.getName())){
-                file.delete();
-                imagesRepository.deleteById(id);
-            }
-        }
+        File imagem = new File(String.valueOf(fileStorageLocation+"/"+nome));
+            imagem.delete();
+            imagesRepository.deleteById(id);
     }
 
-    public void compararDuasImagens(MultipartFile file1, MultipartFile file2 ) throws Exception {
+    public String compararDuasImagens(MultipartFile file1, MultipartFile file2 ) throws Exception {
         BufferedImage img1 = ImageIO.read(file1.getInputStream());
         BufferedImage img2 = ImageIO.read(file2.getInputStream());
 
         Hash hash1 = hasher.hash(img1);
         Hash hash2 = hasher.hash(img2);
-        this.similarityScore = hash1.normalizedHammingDistance(hash2);
+        double similarityScore = hash1.normalizedHammingDistance(hash2);
 
-    }
-    public double getSimilarityScore() {
-        return similarityScore;
-    }
+        return ("O coeficiente de diferença entre a imagem " + file1.getOriginalFilename() +
+                " e a imagem " + file2.getOriginalFilename() +
+                " é: " + similarityScore);
 
-    public void setSimilarityScore(double similarityScore) {
-        this.similarityScore = similarityScore;
     }
 
     public String compararUmaImagem(MultipartFile file1) throws Exception {
         double score=64;
+        double similarityScore=1;
         String imagemMaisIgual="";
 
         BufferedImage img1 = ImageIO.read(file1.getInputStream());
         Hash hash1 = hasher.hash(img1);
 
         for (Images image : this.imagesRepository.findAll()) {
-            System.out.println(image.getHashvalue());
-            //this.similarityScore = hash1.normalizedHammingDistance(hash2);
+            Hash hash2 = new Hash(image.getHashvalue(),hasher.getKeyResolution(),hasher.algorithmId());
+            similarityScore = hash1.normalizedHammingDistance(hash2);
             if (similarityScore<score){
-                score=this.similarityScore;
+                score=similarityScore;
                 imagemMaisIgual=image.getNome();
             }
         }
         return ("A imagem mais similar é: "+ imagemMaisIgual +
-                "com o coeficiente de diferença: "+ similarityScore);
+                " com o coeficiente de diferença: "+ similarityScore);
    }
 
 }

@@ -1,7 +1,6 @@
 package next_cesar_imersao.PerceptualHash.model.Abstract;
 
 
-import dev.brachtendorf.jimagehash.hash.Hash;
 import next_cesar_imersao.PerceptualHash.model.Interface.ImagesEntity;
 
 import javax.persistence.Column;
@@ -60,8 +59,8 @@ public abstract class AbstractImages implements ImagesEntity {
     }
 
     @Override
-    public Hash getHashvalue() {
-        return null;
+    public BigInteger getHashvalue() {
+        return this.hashvalue;
     }
 
     @Override

@@ -23,7 +23,6 @@ public class ImagesControler {
     }
 
     @GetMapping({"/", "/images/list", "/images/list/"})
-    @ResponseStatus(HttpStatus.OK)
     public @ResponseBody List<Images> showListImagens(){
         return this.imagesService.listagemImagens();
     }
@@ -36,8 +35,7 @@ public class ImagesControler {
     }
 
     @DeleteMapping({ "/imagem/{id}/{nome}", "/imagem/{id}/{nome}/"})
-    public String delete(@RequestParam("id") final Long id,
-                         @RequestParam("nome") final String nome) throws IOException {
+    public String delete(final Long id,final String nome) throws IOException {
         this.imagesService.delete(id,nome);
         return "imagem deletada do banco de dados";
     }
@@ -46,16 +44,13 @@ public class ImagesControler {
     public String comparar2Imagens(@RequestParam("imagem1") MultipartFile multipartFile1,
                             @RequestParam("imagem2") MultipartFile multipartFile2
     ) throws Exception {
-        imagesService.compararDuasImagens(multipartFile1,multipartFile2);
-        return ("O coeficiente de diferença entre a imagem " + multipartFile1.getOriginalFilename() +
-                " e a imagem " + multipartFile2.getOriginalFilename() +
-                " é: " + imagesService.getSimilarityScore());
+
+        return imagesService.compararDuasImagens(multipartFile1,multipartFile2);
     }
 
     @PostMapping({"/imagem/comparar1imagem", "/imagem/comparar1imagem/"})
     public String comparar1Imagem(@RequestParam("imagem1") MultipartFile file1) throws Exception {
-        imagesService.compararUmaImagem(file1);
-        return ("Comparação feita com sucesso");
+        return imagesService.compararUmaImagem(file1);
     }
 
 }
