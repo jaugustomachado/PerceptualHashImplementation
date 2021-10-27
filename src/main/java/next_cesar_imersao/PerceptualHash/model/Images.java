@@ -16,6 +16,6 @@ public class Images extends AbstractImages {
 
     @Override
     public String toString() {
-        return String.format("{%s id=%d, nome='%s', hashvalue=%d}",super.toString(), super.getId(), super.getNome(), super.getHashvalue());
+        return String.format("{%s id=%d, nome='%s', hashvalue=%d, upload_dir='%s'}",super.toString(), super.getId(), super.getNome(), super.getHashvalue(),super.getUploadDir());
     }
 }
