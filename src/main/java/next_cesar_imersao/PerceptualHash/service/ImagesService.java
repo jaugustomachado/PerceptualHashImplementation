@@ -43,8 +43,7 @@ public class ImagesService {
        return this.imagesRepository.findAll();
     }
 
-    public void saveFile(String nome,
-                         MultipartFile multipartFile) throws IOException {
+    public void saveFile(String nome, MultipartFile multipartFile) throws IOException {
         Path uploadPath = fileStorageLocation;
         Path filePath = uploadPath.resolve(nome);
         try (InputStream inputStream = multipartFile.getInputStream()) {
@@ -57,19 +56,15 @@ public class ImagesService {
     @Transactional
     public String storeFile(MultipartFile file) throws Exception {
         String originalNome = StringUtils.cleanPath(file.getOriginalFilename());
-        String nome = "";
-        try {
-            if(originalNome.contains("..")) {
-                throw new Exception("Sorry! Filename contains invalid path sequence " + originalNome);
-            }
-            String fileExtension = "";
-            try {
-                fileExtension = originalNome.substring(originalNome.lastIndexOf("."));
-            } catch(Exception e) {
-                fileExtension = "";
-            }
-            if (fileExtension.equals(".jpg")) {
-                if (!TesteImagemExistente.existeONome(String.valueOf(fileStorageLocation), originalNome)) {
+        Boolean testImageAlreadyExists=false;
+              if(file.getOriginalFilename().endsWith(".jpg")){
+                List<Images> listaImages= imagesRepository.findAll();
+                for(Images image: listaImages){
+                    if(image.getNome().equals(originalNome)){
+                        testImageAlreadyExists=true;
+                    }
+                }
+                if (!testImageAlreadyExists) {
                     saveFile(originalNome, file);
                     Images newImage = new Images();
                     newImage.setNome(originalNome);
@@ -80,14 +75,11 @@ public class ImagesService {
                 } else {throw new ImageAlreadyExistsException("Imagem com o mesmo nome já existe no Banco de dados");}
             }else{throw new ImageFileExtensionException("Imagem deve possuir extensão .jpg");}
             return originalNome;
-        } catch (IOException ex) {
-            throw new Exception("Could not store file " + nome + ". Please try again!", ex);
-        }
     }
 
 
     @Transactional
-    public void delete(Long id, String nome) {
+    public void deleteImage(Long id, String nome) {
         File imagem = new File(String.valueOf(fileStorageLocation + "/" + nome));
         if (imagem.exists() && !imagem.isDirectory() && imagesRepository.findById(id).isPresent()) {
             imagesRepository.deleteById(id);
@@ -115,7 +107,7 @@ public class ImagesService {
     }
 
     public String compararUmaImagem(MultipartFile file1) throws Exception {
-        double score = 64;
+        double score = 1;
         double similarityScore = 1;
         String imagemMaisIgual = "";
 
@@ -126,13 +118,14 @@ public class ImagesService {
             for (Images image : this.imagesRepository.findAll()) {
                 Hash hash2 = new Hash(image.getHashvalue(), hasher.getKeyResolution(), hasher.algorithmId());
                 similarityScore = hash1.normalizedHammingDistance(hash2);
+
                 if (similarityScore < score) {
                     score = similarityScore;
                     imagemMaisIgual = image.getNome();
                 }
             }
             return ("A imagem mais similar é: " + imagemMaisIgual +
-                    " com o coeficiente de diferença: " + similarityScore);
+                    " com o coeficiente de diferença: " + score);
         } else {
             throw new ImageFileExtensionException("Imagem deve possuir extensão .jpg");
         }

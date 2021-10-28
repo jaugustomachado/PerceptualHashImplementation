@@ -5,6 +5,7 @@ import next_cesar_imersao.PerceptualHash.model.Images;
 import next_cesar_imersao.PerceptualHash.service.ImagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +22,7 @@ public class ImagesController {
         this.imagesService = imagesService;
     }
 
-    @GetMapping({"/", "/images/list", "/images/list/"})
+    @GetMapping({"/", "/imagem/list", "/imagem/list/"})
     public @ResponseBody List<Images> showListImagens(){
         return this.imagesService.listagemImagens();
     }
@@ -34,13 +35,13 @@ public class ImagesController {
     }
 
     @DeleteMapping({ "/imagem/{id}/{nome}", "/imagem/{id}/{nome}/"})
-    public String delete(final Long id,final String nome) throws IOException {
-        this.imagesService.delete(id,nome);
+    public String deleteImage(@PathVariable("id") final Long id,
+                         @PathVariable("nome") final String nome) throws IOException {
+        this.imagesService.deleteImage(id,nome);
         return "imagem deletada do banco de dados";
     }
 
     @PostMapping({"/imagem/comparar2imagens", "/imagem/comparar2imagens/"})
-    @ResponseStatus(HttpStatus.OK)
     public String comparar2Imagens(@RequestParam("imagem1") MultipartFile multipartFile1,
                             @RequestParam("imagem2") MultipartFile multipartFile2) throws Exception {
         return imagesService.compararDuasImagens(multipartFile1,multipartFile2);
