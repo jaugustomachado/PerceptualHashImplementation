@@ -56,15 +56,8 @@ public class ImagesService {
     @Transactional
     public String storeFile(MultipartFile file) throws Exception {
         String originalNome = StringUtils.cleanPath(file.getOriginalFilename());
-        Boolean testImageAlreadyExists=false;
               if(file.getOriginalFilename().endsWith(".jpg")){
-                List<Images> listaImages= imagesRepository.findAll();
-                for(Images image: listaImages){
-                    if(image.getNome().equals(originalNome)){
-                        testImageAlreadyExists=true;
-                    }
-                }
-                if (!testImageAlreadyExists) {
+                if (imagesRepository.findByName(originalNome)==null) {
                     saveFile(originalNome, file);
                     Images newImage = new Images();
                     newImage.setNome(originalNome);

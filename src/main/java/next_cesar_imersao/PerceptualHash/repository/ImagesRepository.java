@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ImagesRepository extends NextRepository<Images> {
 
+    @Query("SELECT t FROM Images t WHERE t.nome=?1")
+    Images findByName(String nome);
 }
